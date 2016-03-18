@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>MyShop</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="keywords" content="myshop" />
+    <meta name="description" content="myshop" />
+	<link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link href="bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet">
+	<link href="user/css/bootstrap-user-login.min.css" rel="stylesheet">
+	<link href="src/css/bootstrap-myshop.css" rel="stylesheet">
+  </head>
+  <body>    
+    <header class="navbar navbar-default navbar-fixed-top" id="top" role="banner">
+      <div class="container">
+      <div class="navbar-header">
+      <a href="/" class="navbar-brand">Myshop</a>
+      </div>
+    </div>
+    </header>
+    <main class="container" id="content" role="main" tabindex="-1">
+	<nav>
+	<ul class="nav nav-tabs">
+	<li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">开单</a></li>
+	<li role="presentation"><a href="#query" aria-controls="query" role="tab" data-toggle="tab">交易查询</a></li>
+	<li role="presentation"><a href="#manage" aria-controls="manage" role="tab" data-toggle="tab">管理</a></li>
+	</ul>
+	</nav>
+	<div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="home">
+    <div class="container-fluid">
+	  <div class="row">
+	    <div class="col-md-4">
+		  <h3>商品</h3>
+		  <div class="ms-prod-selector">
+		  <table id="prodSelector" class="table table-hover">
+		    <thead><tr><th>名称</th><th>单价</th></tr></thead>
+		  </table>
+		  </div>
+		</div>
+		<div class="col-md-8">
+		  <h3>开单</h3>
+		  <div class="ms-prodtxn-container">
+		  <table class="table table-condensed ms-txn-table" data-del-row="true">
+		    <thead><tr><th>名称</th><th>单价</th><th>数量</th><th>金额</th></tr></thead>
+		  </table>
+		  </div>
+		  <form class="ms-txn-form" action="api/txns">
+		  <input type="hidden" name="txn_details" />
+		  <input type="hidden" name="cust_id" />
+		  <div class="form-group">
+			<div class="input-group">
+			  <div class="input-group-addon">￥</div>
+			  <input type="text" class="form-control" id="sum_amt" name="sum_amt" placeholder="总金额">
+			</div>
+		  </div>
+		  <div class="form-group">
+			<div class="input-group">
+			  <input type="text" class="form-control" name="cust_name" placeholder="客户名称">
+			  <a class="btn btn-primary dropdown-toggle input-group-addon" data-toggle="dropdown" href="#">
+				<span class="caret"></span>
+			  </a>
+			  <ul class="dropdown-menu mylist-customers">
+			  </ul>
+			</div>
+		  </div>
+		  <div class="form-group">
+			<textarea class="form-control" rows="3" name="remark" placeholder="备注"></textarea>
+		  </div>
+		  <div class="form-group">
+			  <button type="submit" class="btn btn-default">提交</button>
+			  <button type="reset" class="btn btn-default">重置</button>
+		  </div>
+		  </form>
+		</div>
+	  </div>
+	</div>
+	</div>
+    <div role="tabpanel" class="tab-pane" id="query">
+	  <nav class="navbar navbar-default">
+		<form class="navbar-form navbar-left ms-txnquery-form" role="search" action="/api/txns" method="GET">
+		
+		<div class="form-group">    
+		<div class="input-daterange input-group" id="datepicker">
+        <input type="text" class="input-sm form-control" name="start" placeholder="开始日期"/>
+        <span class="input-group-addon">至</span>
+        <input type="text" class="input-sm form-control" name="end" placeholder="结束日期" />
+		</div>
+		  <input type="text" class="input-sm form-control" name="q" placeholder="客户名称">
+		</div>
+		<button type="submit" class="btn btn-default">查询</button>
+		</form>
+	  </nav>
+	  <table class="table table-condensed table-striped" id="txnQueryTable">
+		<thead><tr><th>客户名称</th><th>交易金额</th><th>备注</th><th>交易日期</th><th></th></tr></thead>
+	  </table> 
+	  <div class="modal ms-dlg" id="ms-txndetail-dlg" tabindex="-1">
+	    <div class="modal-dialog">
+		  <div class="modal-content">
+		    <div class="modal-header">
+			  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			  <h4 class="modal-title">交易明细</h4>
+			</div>
+		    <div class="modal-body">
+			  <table class="table table-condensed table-striped" id="txnDetailTable">
+				<thead><tr><th>名称</th><th>单价</th><th>数量</th><th>金额</th></tr></thead>
+			  </table> 
+			</div>
+		  </div>
+		</div>
+	  </div>
+	</div>
+    <div role="tabpanel" class="tab-pane" id="manage">
+	  <nav class="navbar navbar-default">
+		<form class="navbar-form navbar-left ms-addprod-form" action="/api/prods">
+		  <div class="form-group">
+		  <input type="hidden" name="type_id" value="1">
+		  <input type="hidden" name="unit_id">
+		  <input type="text" class="form-control" id="name" name="name" placeholder="商品名称">
+		  <input type="text" class="form-control" id="price" name="price" placeholder="单位价格">
+		  <div class="input-group">
+			  <input type="text" class="form-control" name="unit_name" placeholder="单位">
+			  <a class="btn btn-primary dropdown-toggle input-group-addon" data-toggle="dropdown" href="#">
+				<span class="caret"></span>
+			  </a>
+			  <ul class="dropdown-menu mylist-units">
+			  </ul>
+			</div>
+		  <input type="text" class="form-control" id="def_quantity" name="def_quantity" placeholder="默认起售数量">
+		  <button type="submit" class="btn btn-default">新增</button>
+		  </div>
+		</form>
+	  </nav>
+	  <table class="table ms-prod-table" data-del-row="true" data-action="/api/prods">
+		<thead><tr><th>#</th><th>商品名称</th><th>单价</th><th>起售数量</th></tr></thead>
+	  </table>
+	</div>
+	</div>
+	</main>
+	<script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="user/js/userlogin_allinone.js" type="text/javascript"></script>
+    <script src="user/js/user-message.min.js" type="text/javascript"></script>
+    <script src="bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+    <script src="bower_components/jquery-mytools/dist/jquery-mytools.min.js"></script>
+    <script src="src/js/myshop.js"></script>
+  </body>
+</html>
