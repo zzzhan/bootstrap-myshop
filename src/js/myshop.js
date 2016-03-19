@@ -170,15 +170,14 @@
 	function(e){
 	var hit=false,key=e.key.toUpperCase();
 	  if(!$(e.target).is('[contenteditable=true]')) {
-		switch(key) {
-		  case 'A':
+		switch(e.which) {
+		  case 65://A key
 			if(!!e.ctrlKey) {
 			  $('.table', $('.tab-pane.active')).mytable('select');
 			  hit = true;
 			}
 		  break;
-		  case 'DELETE':
-		  case 'BACKSPACE':
+		  case 46://DELETE key
 			if(!$(e.target).is('input')) {
 			  var mytable = $('.table[data-del-row=true]', $('.tab-pane.active')),
 			  acturl = mytable.data('action'),
