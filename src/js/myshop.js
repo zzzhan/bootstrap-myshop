@@ -155,6 +155,7 @@
 		 var fm = $('.ms-txn-form')[0];
 		 fm.cust_id.value=item.id;
 		 fm.cust_name.value=item.name;
+		 fm.cust_addr.value=item.addr||'';
 	  });
 	});
   }, "json");	
