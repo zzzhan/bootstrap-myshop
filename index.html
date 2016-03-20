@@ -65,7 +65,7 @@
 		  </div>
 		  <div class="form-group">
 			<div class="input-group">
-			  <input type="text" class="form-control" name="cust_name" placeholder="客户名称">
+			  <input type="text" class="form-control" name="cust_name" placeholder="客户名称" autocomplete="off">
 			  <a class="btn btn-primary dropdown-toggle input-group-addon" data-toggle="dropdown" href="#">
 				<span class="caret"></span>
 			  </a>
@@ -78,6 +78,9 @@
 		  </div>
 		  <div class="form-group">
 			<textarea class="form-control" rows="3" name="remark" placeholder="备注"></textarea>
+		  </div>
+		  <div class="form-group">
+			<input type="text" class="form-control" id="txn_date" name="txn_date" placeholder="交易日期">
 		  </div>
 		  <div class="form-group">
 			  <button type="submit" class="btn btn-default">提交</button>
@@ -129,7 +132,7 @@
 		  <input type="hidden" name="type_id">
 		  <input type="hidden" name="unit_id">
 		  <div class="input-group">
-		  <input type="text" class="form-control" name="type_name" placeholder="商品类型">
+		  <input type="text" class="form-control" name="type_name" placeholder="商品类型" autocomplete="off">
 		  <a class="btn btn-primary dropdown-toggle input-group-addon" data-toggle="dropdown" href="#">
 			<span class="caret"></span>
 		  </a>
@@ -139,7 +142,7 @@
 		  <input type="text" class="form-control" id="name" name="name" placeholder="商品名称">
 		  <input type="text" class="form-control" id="price" name="price" placeholder="单位价格">
 		  <div class="input-group">
-		  <input type="text" class="form-control" name="unit_name" placeholder="单位">
+		  <input type="text" class="form-control" name="unit_name" placeholder="单位" autocomplete="off">
 		  <a class="btn btn-primary dropdown-toggle input-group-addon" data-toggle="dropdown" href="#">
 			<span class="caret"></span>
 		  </a>

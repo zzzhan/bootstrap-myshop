@@ -103,7 +103,10 @@
   $('.ms-txnquery-form').myform().on('mf.submited', function(e,resp){
 	txnQueryTable.mytable('data', resp.data);
   });
-  $('#query .input-daterange').datepicker({format: "yyyy-mm-dd"});
+  $('#query .input-daterange').datepicker({format: "yyyy-mm-dd",autoclose: true,
+    todayHighlight: true});
+  $('#txn_date').datepicker({format: "yyyy-mm-dd",
+    "autoclose": true}).datepicker("setDate", new Date());
   $('.ms-txn-form').myform().on('mf.submit', function(){
 	var fm=$(this),txnDetail = JSON.stringify(txnContainer.data());
 	$('input[name=txn_details]', fm).val(txnDetail);	  
