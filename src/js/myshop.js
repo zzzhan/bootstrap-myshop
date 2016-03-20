@@ -24,11 +24,13 @@
 	},
 	amount: function(row){
 	  return '￥'+(row.quantity*row.price);
+	},
+	type: function(row) {
+	  return __types[row.type_id+'']||'';
 	}
-  },header=[{key:'name'},{key:'price',
-	renderer:renders.unitprice}
-  ],  
+  },  
   prodMngTable = $('.ms-prod-table').mytable({selectabled:true,header:[{key:'id',text:'#'},
+	{key:'type_id',renderer:renders.type},
 	{key:'name',editabled:true},{key:'price',editabled:true,type:'float',
 	renderer:renders.unitprice},
 	{key:'def_quantity',editabled:true,type:'float'}]}).on('edit',
@@ -42,7 +44,9 @@
 	  }
 	  })
 	}),
-  prodSelector = $('#prodSelector').mytable({header:header}).on('dblclick', 'tbody tr', function(e){
+  prodSelectTable = $('.ms-prod-select-table').mytable({header:[{key:'type_id',renderer:renders.type},{key:'name'},{key:'price',
+	renderer:renders.unitprice}
+  ]}).on('dblclick', 'tbody tr', function(e){
 	e.preventDefault(); 
 	e.stopPropagation();
 	var row = $(e.currentTarget).data('row'),
@@ -61,11 +65,13 @@
 	  $.extend(clone,row);
 	  txnContainer.insert(clone);
 	}
-  }).data('mytable');
-  var txnTableOpt = {selectabled:true,header:header.concat([
+  }),
+  prodSelector=prodSelectTable.data('mytable');
+  var txnTableOpt = {selectabled:true,header:[{key:'name'},{key:'price',
+	renderer:renders.unitprice},
 	{key:'quantity',editabled:true,type:'float',renderer:renders.quantity},
 	{key:'amount',renderer:renders.amount}
-  ])},
+  ]},
   txnContainer = $('.ms-txn-table').mytable(txnTableOpt).on('update', function(){
 	var data = txnContainer.data(),amt=0;
 	for(var i=0;i<data.length;i++) {
@@ -89,10 +95,11 @@
 	  var row = txnQueryTable.data('mytable').data()[button.data('index')],
 	  jarr = JSON.parse(row.txn_detail);
 	  $('#txnDetailTable').mytable('data',jarr);
-  }).find('#txnDetailTable').mytable({header:header.concat([
+  }).find('#txnDetailTable').mytable({header:[{key:'name'},{key:'price',
+	renderer:renders.unitprice},
 	{key:'quantity',renderer:renders.quantity},
 	{key:'amount',renderer:renders.amount}
-  ])});
+  ]});
   $('.ms-txnquery-form').myform().on('mf.submited', function(e,resp){
 	txnQueryTable.mytable('data', resp.data);
   });
@@ -106,14 +113,10 @@
 	console.log(resp);
   });
   $('.ms-addprod-form').myform().on('mf.submited', function(e,resp){
-	var data=resp.data,row={id:data[2].insertId};
-	$(':input', $(this)).each(function(){
-	  row[this.name]=this.value;
-	});
-	if(data[0].length===0) {
-	  row.unit_id=data[1].insertId;
+	  var row = resp.data;
+	  console.log(row);
 	  __units[row.unit_id+''] = row.unit_name;
-	}
+	  __types[row.type_id+''] = row.type_name;
 	prodMngTable.mytable('insert', row);
 	prodSelector.refresh();
 	this.reset();
@@ -139,12 +142,53 @@
 		callback(data);
 	  }
 	});
-  }
+  };
+  var loadTypes = function(callback) {
+	  $.getJSON('/api/prods/types', function(resp){
+	  var types = {},data=resp.data;
+	  for(var i=0;i<data.length;i++) {
+		var item = data[i];
+		types[item.id+''] = item.name;
+	  }
+	  __types = types;
+	  $('.mylist-types').mylist({
+		  renderer:function(item) {
+			return item.name;
+		  }
+	  }).mylist('init',data).on('selected', function(e, item) {
+		  var ul = $(e.target);
+		  switch(ul.attr('id')) {
+			case 'prod_type_query':
+			$.get('/api/prods', {q:item.id}, function(resp){
+				prodMngTable.mytable('data', resp.data);
+			});
+			break;
+			case 'prod_type_select':
+			$.get('/api/prods', {q:item.id}, function(resp){
+			  prodSelectTable.mytable('data', resp.data);
+			});
+			break;
+			case 'prod_type_add':
+			  var fm = $('.ms-addprod-form')[0];
+			  fm.type_id.value=item.id;
+			  fm.type_name.value=item.name;
+			break;
+			
+		  }
+	  });
+	  if(typeof callback==='function') {
+		callback(data);
+	  }
+	});
+  };
   $.post('/api/auth/signin', {login:'jinghao',password:'hao1234'}, function(){
-	loadUnits();
-	$.getJSON('/api/prods', function(resp){
-		prodSelector.data(resp.data);
-		prodMngTable.mytable('data', resp.data);
+	loadUnits(function(){
+	  loadTypes(function(){
+		$.getJSON('/api/prods', function(resp){
+			prodSelector.data(resp.data);
+			prodMngTable.mytable('data', resp.data);
+		});
+	  });		
 	});
 	$.getJSON('/api/cust', function(resp){
 	  var data = resp.data;
@@ -166,6 +210,14 @@
       $.getJSON('/api/prods', function(resp){
 		prodSelector.data(resp.data);
 	  });	  
+	}
+  });
+  $(document).on('click', 'button', function(e){
+	var btn = $(e.target);
+	if(btn.is('.ms-btn-prod-type')) {
+      $.getJSON('/api/prods', function(resp){		
+	    $('#'+btn.data('ms-target')).mytable('data', resp.data);
+	  });
 	}
   });
   $(document).bind('keydown',

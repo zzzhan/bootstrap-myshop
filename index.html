@@ -34,8 +34,16 @@
 	    <div class="col-md-4">
 		  <h3>商品</h3>
 		  <div class="ms-prod-selector">
-		  <table id="prodSelector" class="table table-hover">
-		    <thead><tr><th>名称</th><th>单价</th></tr></thead>
+		  <table class="table table-hover ms-prod-select-table" id="prodSelectTable">
+		    <thead><tr><th>
+		  <div class="input-group">
+		  <div class="input-group-btn">
+		  <button type="button" class="btn btn-default btn-xs ms-btn-prod-type" data-ms-target="prodSelectTable">商品类型</button>
+		  <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="caret"></span></button>
+		  <ul class="dropdown-menu mylist-types" id="prod_type_select">
+		  </ul>
+		  </div>
+		  </div></th><th>名称</th><th>单价</th></tr></thead>
 		  </table>
 		  </div>
 		</div>
@@ -118,25 +126,41 @@
 	  <nav class="navbar navbar-default">
 		<form class="navbar-form navbar-left ms-addprod-form" action="/api/prods">
 		  <div class="form-group">
-		  <input type="hidden" name="type_id" value="1">
+		  <input type="hidden" name="type_id">
 		  <input type="hidden" name="unit_id">
+		  <div class="input-group">
+		  <input type="text" class="form-control" name="type_name" placeholder="商品类型">
+		  <a class="btn btn-primary dropdown-toggle input-group-addon" data-toggle="dropdown" href="#">
+			<span class="caret"></span>
+		  </a>
+		  <ul class="dropdown-menu mylist-types" id="prod_type_add">
+		  </ul>
+		  </div>
 		  <input type="text" class="form-control" id="name" name="name" placeholder="商品名称">
 		  <input type="text" class="form-control" id="price" name="price" placeholder="单位价格">
 		  <div class="input-group">
-			  <input type="text" class="form-control" name="unit_name" placeholder="单位">
-			  <a class="btn btn-primary dropdown-toggle input-group-addon" data-toggle="dropdown" href="#">
-				<span class="caret"></span>
-			  </a>
-			  <ul class="dropdown-menu mylist-units">
-			  </ul>
-			</div>
+		  <input type="text" class="form-control" name="unit_name" placeholder="单位">
+		  <a class="btn btn-primary dropdown-toggle input-group-addon" data-toggle="dropdown" href="#">
+			<span class="caret"></span>
+		  </a>
+		  <ul class="dropdown-menu mylist-units">
+		  </ul>
+		  </div>
 		  <input type="text" class="form-control" id="def_quantity" name="def_quantity" placeholder="默认起售数量">
 		  <button type="submit" class="btn btn-default">新增</button>
 		  </div>
 		</form>
 	  </nav>
-	  <table class="table ms-prod-table" data-del-row="true" data-action="/api/prods">
-		<thead><tr><th>#</th><th>商品名称</th><th>单价</th><th>起售数量</th></tr></thead>
+	  <table class="table ms-prod-table" id="prodMgrTable" data-del-row="true" data-action="/api/prods">
+		<thead><tr><th>#</th><th>
+		  <div class="input-group">
+		  <div class="input-group-btn">
+		  <button type="button" class="btn btn-default btn-xs ms-btn-prod-type" title="全部" data-ms-target="prodMgrTable">商品类型</button>
+		  <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="caret"></span></button>
+		  <ul class="dropdown-menu mylist-types" id="prod_type_query">
+		  </ul>
+		  </div>
+		  </div></th><th>商品名称</th><th>单价</th><th>起售数量</th></tr></thead>
 	  </table>
 	</div>
 	</div>
