@@ -95,8 +95,8 @@
 		<button type="submit" class="btn btn-default">查询</button>
 		</form>
 	  </nav>
-	  <table class="table table-condensed table-striped" id="txnQueryTable">
-		<thead><tr><th>客户名称</th><th>交易金额</th><th>备注</th><th>交易日期</th><th></th></tr></thead>
+	  <table class="table table-condensed" id="txnQueryTable" data-del-row="true" data-action="/api/txns">
+		<thead><tr><th>客户名称</th><th>交易金额</th><th>客户地址</th><th>备注</th><th>交易日期</th><th></th></tr></thead>
 	  </table> 
 	  <div class="modal ms-dlg" id="ms-txndetail-dlg" tabindex="-1">
 	    <div class="modal-dialog">

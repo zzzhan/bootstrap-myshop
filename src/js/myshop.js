@@ -74,9 +74,10 @@
 	}
 	$('#sum_amt').val(amt);
   }).data('mytable'),
-  txnQueryTable = $('#txnQueryTable').mytable({header:[
+  txnQueryTable = $('#txnQueryTable').mytable({selectabled:true,header:[
 	{key:'cust_name'},
 	{key:'txn_amt',renderer:function(row){return '￥'+row.txn_amt;}},
+	{key:'cust_addr'},
 	{key:'remark'},
 	{key:'txn_date'},
 	{key:'txn_detail',renderer:function(row,i){
@@ -187,7 +188,7 @@
 			    var rows = mytable.data('mytable').selecteds();
 				if(!!acturl&&rows.length>0) {
 				  $.ajax({method:'delete',
-				  url:acturl+'/'+mytable.data('mytable').uuid(rows[0]),
+				  url:acturl+'/'+mytable.data('mytable').rowId(rows[0]),
 				  success: function() {
 					mytable.mytable('remove',rows);
 				  }
