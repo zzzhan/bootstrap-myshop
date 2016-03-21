@@ -43,6 +43,15 @@
 		el.mytable('reset');
 	  }
 	  })
+	}).on('dblclick', 'tbody tr', function(e){
+	  var mytable = $(e.delegateTarget),
+	  ind=$('tbody tr', mytable).index(e.currentTarget),
+	  row = mytable.data('mytable').data()[ind];
+	  row.type_name=__types[row.type_id+''];
+	  row.unit_name=__units[row.unit_id+''];
+	  var fm = $('.ms-addprod-form')[0];
+	  setForm(fm, row)['name'].focus();
+	  $('[type="submit"]',fm).text('更新');
 	}),
   prodSelectTable = $('.ms-prod-select-table').mytable({header:[{key:'type_id',renderer:renders.type},{key:'name'},{key:'price',
 	renderer:renders.unitprice}
@@ -78,7 +87,7 @@
 	  var it = data[i];
 	  amt+=it.quantity*it.price;
 	}
-	$('#sum_amt').val(amt);
+	$('#txn_amt').val(amt);
   }).data('mytable'),
   txnQueryTable = $('#txnQueryTable').mytable({selectabled:true,header:[
 	{key:'cust_name'},
@@ -87,9 +96,36 @@
 	{key:'remark'},
 	{key:'txn_date'},
 	{key:'txn_detail',renderer:function(row,i){
-	  return '<a href="#" class="btn btn-default btn-xs" data-toggle="modal" data-target="#ms-txndetail-dlg"  data-index="'+i+'">明细</a>';
+	  return '<div class="btn-group btn-group-xs" role="group"><button class="btn btn-default btn-xs" data-toggle="modal" data-target="#ms-txndetail-dlg"  data-index="'+i+'">明细</button><button class="btn btn-default btn-xs" data-ms-action="modify" data-index="'+i+'">修改</button><button class="btn btn-default btn-xs" data-ms-action="copy" data-index="'+i+'">复制</button></div>';
 	}}
-  ]});
+  ]}).on('click', 'button', function(e){
+	  var btn = $(e.target),row=null;
+	  switch(btn.data('ms-action')) {
+		case 'modify':
+		row = $(e.delegateTarget).data('mytable').data()[btn.data('index')];
+		setTxnForm(row);
+		break;
+		case 'copy':
+		row = $(e.delegateTarget).data('mytable').data()[btn.data('index')];
+		setTxnForm(row).id.value='';
+		break;
+	  }
+  });
+  var setTxnForm = function(row) {
+	var fm = $('.ms-txn-form')[0];
+	setForm(fm, row);
+	$('.ms-txn-table').mytable('data', JSON.parse(row.txn_detail));
+	$('#myTabs a[href="#home"]').tab('show');
+    return fm;	
+  },
+  setForm = function(fm, row) {
+	for(var k in row) {
+	  if(!!fm[k]) {
+		fm[k].value=row[k];
+	  }
+	}
+	return fm;
+  };
   $('#ms-txndetail-dlg').on('show.bs.modal', function (event) {
       var button = $(event.relatedTarget);
 	  var row = txnQueryTable.data('mytable').data()[button.data('index')],
@@ -113,16 +149,15 @@
   }).on('mf.submited', function(e,resp){
 	this.reset();
 	txnContainer.removeAll();
-	console.log(resp);
   });
   $('.ms-addprod-form').myform().on('mf.submited', function(e,resp){
 	  var row = resp.data;
-	  console.log(row);
 	  __units[row.unit_id+''] = row.unit_name;
 	  __types[row.type_id+''] = row.type_name;
 	prodMngTable.mytable('insert', row);
 	prodSelector.refresh();
 	this.reset();
+	$('[type="submit"]',this).text('新增');
   });
   var loadUnits = function(callback) {
 	  $.getJSON('/api/prods/units', function(resp){
@@ -184,36 +219,19 @@
 	  }
 	});
   };
-  $.post('/api/auth/signin', {login:'jinghao',password:'hao1234'}, function(){
-	loadUnits(function(){
-	  loadTypes(function(){
-		$.getJSON('/api/prods', function(resp){
-			prodSelector.data(resp.data);
-			prodMngTable.mytable('data', resp.data);
-		});
-	  });		
-	});
-	$.getJSON('/api/cust', function(resp){
-	  var data = resp.data;
-	  $('.mylist-customers').mylist({
-		  renderer:function(item) {
-			return item.name;
-		  }
-	  }).mylist('init',data).on('selected', function(e, item) {
-		 var fm = $('.ms-txn-form')[0];
-		 fm.cust_id.value=item.id;
-		 fm.cust_name.value=item.name;
-		 fm.cust_addr.value=item.addr||'';
-	  });
-	});
-  }, "json");	
   $('a[data-toggle="tab"]').on('show.bs.tab', function (e) {
 	var ishome = $(e.target).is('a[href="#home"]');
 	if(ishome) {
       $.getJSON('/api/prods', function(resp){
 		prodSelector.data(resp.data);
-	  });	  
+	  });
 	}
+  });
+  $('input[name="q"]').on('change', function() {
+	var input = $(this);
+    $.getJSON('/api/prods', {q:input.val()}, function(resp){
+	  $('#'+input.data('ms-target')).mytable('data', resp.data);
+	});
   });
   $(document).on('click', 'button', function(e){
 	var btn = $(e.target);
@@ -222,8 +240,7 @@
 	    $('#'+btn.data('ms-target')).mytable('data', resp.data);
 	  });
 	}
-  });
-  $(document).bind('keydown',
+  }).bind('keydown',
 	function(e){
 	var hit=false,key=e.key.toUpperCase();
 	  if(!$(e.target).is('[contenteditable=true]')) {
@@ -262,5 +279,29 @@
 		}
 	  }
 	//console.log(e);
+	}).ready(function(){
+	  $.post('/api/auth/signin', {login:'jinghao',password:'hao1234'}, function(){
+		loadUnits(function(){
+		  loadTypes(function(){
+			$.getJSON('/api/prods', function(resp){
+				prodSelector.data(resp.data);
+				prodMngTable.mytable('data', resp.data);
+			});
+		  });		
+		});
+		$.getJSON('/api/cust', function(resp){
+		  var data = resp.data;
+		  $('.mylist-customers').mylist({
+			  renderer:function(item) {
+				return item.name;
+			  }
+		  }).mylist('init',data).on('selected', function(e, item) {
+			 var fm = $('.ms-txn-form')[0];
+			 fm.cust_id.value=item.id;
+			 fm.cust_name.value=item.name;
+			 fm.cust_addr.value=item.addr||'';
+		  });
+		});
+	  }, "json");	
 	});
 });
