@@ -151,10 +151,23 @@
 	txnContainer.removeAll();
   });
   $('.ms-addprod-form').myform().on('mf.submited', function(e,resp){
-	  var row = resp.data;
+	  var row = resp.data,
+	  rows = prodMngTable.data('mytable').data(),
+	  flag = false;
+	  for(var i=0;i<rows.length;i++) {
+		if(rows[i].id===row.id){
+		  rows[i]=row;
+		  flag = true;
+		  break;
+		}
+	  }
 	  __units[row.unit_id+''] = row.unit_name;
 	  __types[row.type_id+''] = row.type_name;
-	prodMngTable.mytable('insert', row);
+	  if(flag) {
+	    prodMngTable.mytable('refresh');		  
+	  }else {
+		prodMngTable.mytable('insert', row);
+	  }
 	prodSelector.refresh();
 	this.reset();
 	$('[type="submit"]',this).text('新增');
@@ -302,6 +315,6 @@
 			 fm.cust_addr.value=item.addr||'';
 		  });
 		});
-	  }, "json");	
+	  }, "json");
 	});
 });
