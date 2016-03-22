@@ -27,6 +27,9 @@
 	},
 	type: function(row) {
 	  return __types[row.type_id+'']||'';
+	},
+	custype: function(row) {
+	  return __custypes[row.type_id+'']||'';
 	}
   },  
   prodMngTable = $('.ms-prod-table').mytable({selectabled:true,header:[{key:'id',text:'#'},
@@ -110,7 +113,30 @@
 		setTxnForm(row).id.value='';
 		break;
 	  }
-  });
+  }),  
+  custMngrTable = $('.ms-cust-table').mytable({selectabled:true,header:[{key:'id',text:'#'},
+	{key:'type_id',renderer:renders.custype},{key:'name',editabled:true},
+	{key:'mobile',editabled:true},
+	{key:'addr',editabled:true},{key:'email',editabled:true},
+	{key:'created'}]}).on('edit',
+	function(e, row, col, old){
+	  var el = $(this);
+	  $.ajax({method:'put',
+	  url:'/api/custs/'+row.id,
+	  data:row,
+	  error: function(resp) {
+		el.mytable('reset');
+	  }
+	  })
+	}).on('dblclick', 'tbody tr', function(e){
+	  var mytable = $(e.delegateTarget),
+	  ind=$('tbody tr', mytable).index(e.currentTarget),
+	  row = mytable.data('mytable').data()[ind];
+	  row.type_name=__custypes[row.type_id+''];
+	  var fm = $('.ms-addcust-form')[0];
+	  setForm(fm, row)['name'].focus();
+	  $('[type="submit"]',fm).text('更新');
+	});
   var setTxnForm = function(row) {
 	var fm = $('.ms-txn-form')[0];
 	setForm(fm, row);
@@ -172,84 +198,126 @@
 	this.reset();
 	$('[type="submit"]',this).text('新增');
   });
-  var loadUnits = function(callback) {
-	  $.getJSON('/api/prods/units', function(resp){
-	  var units = {},data=resp.data;
-	  for(var i=0;i<data.length;i++) {
-		var item = data[i];
-		units[item.id+''] = item.name;
+  $('.ms-addcust-form').myform().on('mf.submited', function(e,resp){
+	var row = resp.data,
+	rows = custMngrTable.data('mytable').data(),
+	flag = false;
+	for(var i=0;i<rows.length;i++) {
+	  if(rows[i].id===row.id){
+	    rows[i]=row;
+	    flag = true;
+	    break;
 	  }
-	  __units = units;
-	  $('.mylist-units').mylist({
-		  renderer:function(item) {
-			return item.name;
-		  }
-	  }).mylist('init',data).on('selected', function(e, item) {
-		 var fm = $('.ms-addprod-form')[0];
-		 fm.unit_id.value=item.id;
-		 fm.unit_name.value=item.name;
-	  });
-	  if(typeof callback==='function') {
-		callback(data);
+	}
+	__custypes[row.type_id+''] = row.type_name;
+	if(flag) {
+	  custMngrTable.mytable('refresh');		  
+	}else {
+	  custMngrTable.mytable('insert', row);
+	}
+	this.reset();
+	$('[type="submit"]',this).text('新增');
+  });
+  var rebuildUnits = function(data) {
+	var units = {};
+	for(var i=0;i<data.length;i++) {
+	  var item = data[i];
+	  units[item.id+''] = item.name;
+	}
+	__units = units;
+	$('.mylist-units').mylist({
+	  renderer:function(item) {
+		return item.name;
+	  }
+	}).mylist('init',data).on('selected', function(e, item) {
+	 var fm = $('.ms-addprod-form')[0];
+	 fm.unit_id.value=item.id;
+	 fm.unit_name.value=item.name;
+	});	  
+  };
+  var rebuildTypes = function(data) {
+	var types = {};
+	for(var i=0;i<data.length;i++) {
+	  var item = data[i];
+	  types[item.id+''] = item.name;
+	}
+	__types = types;
+	$('.mylist-types').mylist({
+	  renderer:function(item) {
+		return item.name;
+	  }
+	}).mylist('init',data).on('selected', function(e, item) {
+	  var ul = $(e.target);
+	  switch(ul.attr('id')) {
+		case 'prod_type_query':
+		$.get('/api/prods', {q:item.id}, function(resp){
+		  prodMngTable.mytable('data', resp.data);
+		});
+		break;
+		case 'prod_type_select':
+		$.get('/api/prods', {q:item.id}, function(resp){
+		  prodSelectTable.mytable('data', resp.data);
+		});
+		break;
+		case 'prod_type_add':
+		  var fm = $('.ms-addprod-form')[0];
+		  fm.type_id.value=item.id;
+		  fm.type_name.value=item.name;
+		break;		
 	  }
 	});
   };
-  var loadTypes = function(callback) {
-	  $.getJSON('/api/prods/types', function(resp){
-	  var types = {},data=resp.data;
-	  for(var i=0;i<data.length;i++) {
-		var item = data[i];
-		types[item.id+''] = item.name;
+  var rebuildCustTypes = function(data) {
+	var types = {};
+	for(var i=0;i<data.length;i++) {
+	  var item = data[i];
+	  types[item.id+''] = item.name;
+	}
+	__custypes = types;
+	$('.mylist-custypes').mylist({
+	  renderer:function(item) {
+		return item.name;
 	  }
-	  __types = types;
-	  $('.mylist-types').mylist({
-		  renderer:function(item) {
-			return item.name;
-		  }
-	  }).mylist('init',data).on('selected', function(e, item) {
-		  var ul = $(e.target);
-		  switch(ul.attr('id')) {
-			case 'prod_type_query':
-			$.get('/api/prods', {q:item.id}, function(resp){
-				prodMngTable.mytable('data', resp.data);
-			});
-			break;
-			case 'prod_type_select':
-			$.get('/api/prods', {q:item.id}, function(resp){
-			  prodSelectTable.mytable('data', resp.data);
-			});
-			break;
-			case 'prod_type_add':
-			  var fm = $('.ms-addprod-form')[0];
-			  fm.type_id.value=item.id;
-			  fm.type_name.value=item.name;
-			break;
-			
-		  }
-	  });
-	  if(typeof callback==='function') {
-		callback(data);
+	}).mylist('init',data).on('selected', function(e, item) {
+	  var ul = $(e.target);
+	  switch(ul.attr('id')) {
+		case 'cust_type_onquery':
+		$.get('/api/custs', {q:item.id}, function(resp){
+		  custMngrTable.mytable('data', resp.data);
+		});
+		break;
+		case 'cust_type_onadd':
+		  var fm = $('.ms-addcust-form')[0];
+		  fm.type_id.value=item.id;
+		  fm.type_name.value=item.name;
+		break;		
 	  }
-	});
+	});	  
   };
   $('a[data-toggle="tab"]').on('show.bs.tab', function (e) {
-	var ishome = $(e.target).is('a[href="#home"]');
-	if(ishome) {
+	var target = $(e.target);
+	if(target.is('a[href="#home"]')) {
       $.getJSON('/api/prods', function(resp){
 		prodSelector.data(resp.data);
 	  });
+	} else {
+		/*
+      $.getJSON('/api/custs', function(resp){
+		custMngrTable.mytable('data', resp.data);
+	  });
+		*/
 	}
   });
   $('input[name="q"]').on('change', function() {
 	var input = $(this);
-    $.getJSON('/api/prods', {q:input.val()}, function(resp){
+    $.getJSON(input.data('ms-url'), {q:input.val()}, function(resp){
 	  $('#'+input.data('ms-target')).mytable('data', resp.data);
 	});
   });
   $(document).on('click', 'button', function(e){
 	var btn = $(e.target);
-	if(btn.is('.ms-btn-prod-type')) {
-      $.getJSON('/api/prods', function(resp){		
+	if(btn.is('.ms-btn-types')) {
+      $.getJSON(btn.data('ms-url'), function(resp){		
 	    $('#'+btn.data('ms-target')).mytable('data', resp.data);
 	  });
 	}
@@ -294,27 +362,30 @@
 	//console.log(e);
 	}).ready(function(){
 	  $.post('/api/auth/signin', {login:'jinghao',password:'hao1234'}, function(){
-		loadUnits(function(){
-		  loadTypes(function(){
+		$.getJSON('/api/types', function(resp){
+			var offset = 0;
+			rebuildUnits(resp.data[offset++]);
+			rebuildTypes(resp.data[offset++]);
+			rebuildCustTypes(resp.data[offset++]);
 			$.getJSON('/api/prods', function(resp){
 				prodSelector.data(resp.data);
 				prodMngTable.mytable('data', resp.data);
+			});	
+			$.getJSON('/api/custs', function(resp){
+			  var data = resp.data;
+			  $('.mylist-customers').mylist({
+				  renderer:function(item) {
+					return item.name+'&nbsp;'+(item.mobile||'');
+				  }
+			  }).mylist('init',data).on('selected', function(e, item) {
+				 var fm = $('.ms-txn-form')[0];
+				 fm.cust_id.value=item.id;
+				 fm.cust_name.value=item.name;
+				 fm.cust_addr.value=item.addr||'';
+			  });
+			  custMngrTable.mytable('data', resp.data);
 			});
-		  });		
-		});
-		$.getJSON('/api/cust', function(resp){
-		  var data = resp.data;
-		  $('.mylist-customers').mylist({
-			  renderer:function(item) {
-				return item.name;
-			  }
-		  }).mylist('init',data).on('selected', function(e, item) {
-			 var fm = $('.ms-txn-form')[0];
-			 fm.cust_id.value=item.id;
-			 fm.cust_name.value=item.name;
-			 fm.cust_addr.value=item.addr||'';
-		  });
-		});
+		});	
 	  }, "json");
 	});
 });

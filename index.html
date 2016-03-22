@@ -24,7 +24,8 @@
 	<ul class="nav nav-tabs" id="myTabs">
 	<li role="presentation" class="active"><a href="#home" aria-bcontrols="home" role="tab" data-toggle="tab">开单</a></li>
 	<li role="presentation"><a href="#query" aria-controls="query" role="tab" data-toggle="tab">交易查询</a></li>
-	<li role="presentation"><a href="#manage" aria-controls="manage" role="tab" data-toggle="tab">管理</a></li>
+	<li role="presentation"><a href="#manage" aria-controls="manage" role="tab" data-toggle="tab">商品管理</a></li>
+	<li role="presentation"><a href="#customer" aria-controls="customer" role="tab" data-toggle="tab">客户管理</a></li>
 	</ul>
 	</nav>
 	<div class="tab-content">
@@ -42,7 +43,7 @@
 		  <ul class="dropdown-menu mylist-types" id="prod_type_select">
 		  </ul>
 		  </div>
-		  </div></th><th><div class="input-group input-group-sm"><input type="text" class="form-control input-group-sm" name="q" placeholder="商品名称" data-ms-target="prodSelectTable"></div></th><th>单价</th></tr></thead>
+		  </div></th><th><div class="input-group input-group-sm"><input type="text" class="form-control input-group-sm" name="q" placeholder="商品名称" data-ms-target="prodSelectTable" data-ms-url="/api/prods"></div></th><th>单价</th></tr></thead>
 		  </table>
 		  </div>
 		</div>
@@ -159,12 +160,47 @@
 		<thead><tr><th>#</th><th>
 		  <div class="input-group">
 		  <div class="input-group-btn">
-		  <button type="button" class="btn btn-default btn-sm ms-btn-prod-type" title="全部" data-ms-target="prodMgrTable">商品类型</button>
+		  <button type="button" class="btn btn-default btn-sm ms-btn-types" data-ms-url="/api/prods" title="全部" data-ms-target="prodMgrTable">商品类型</button>
 		  <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="caret"></span></button>
 		  <ul class="dropdown-menu mylist-types" id="prod_type_query">
 		  </ul>
 		  </div>
-		  </div></th><th><div class="input-group input-group-sm"><input type="text" class="form-control input-group-sm" name="q" placeholder="商品名称" data-ms-target="prodMgrTable"></div></th><th>单价</th><th>起售数量</th></tr></thead>
+		  </div></th><th><div class="input-group input-group-sm"><input type="text" class="form-control input-group-sm" name="q" placeholder="商品名称" data-ms-target="prodMgrTable" data-ms-url="/api/prods"></div></th><th>单价</th><th>起售数量</th></tr></thead>
+	  </table>
+	</div>
+    <div role="tabpanel" class="tab-pane" id="customer">
+	  <nav class="navbar navbar-default">
+		<form class="navbar-form navbar-left ms-addcust-form" action="/api/custs">
+		  <input type="text" class="hidden" name="id">
+		  <input type="text" class="hidden" name="type_id">
+		  <div class="form-group">
+		  <div class="input-group">
+		  <input type="text" class="form-control" name="type_name" placeholder="客户类型" autocomplete="off">
+		  <a class="btn btn-primary dropdown-toggle input-group-addon" data-toggle="dropdown" href="#">
+			<span class="caret"></span>
+		  </a>
+		  <ul class="dropdown-menu mylist-custypes" id="cust_type_onadd">
+		  </ul>
+		  </div>
+		  <input type="text" class="form-control" name="name" placeholder="客户名称">
+		  <input type="text" class="form-control" name="mobile" placeholder="手机号码">
+		  <input type="text" class="form-control" name="addr" placeholder="地址">
+		  <input type="email" class="form-control" name="email" placeholder="电子邮箱">
+		  <button type="submit" class="btn btn-default">新增</button>
+		  <button type="reset" class="btn btn-default" name="btn_reset">重置</button>
+		  </div>
+		</form>
+	  </nav>
+	  <table class="table jq-mytable ms-cust-table" id="custMgrTable" data-del-row="true" data-action="/api/custs">
+		<thead><tr><th>#</th><th>
+		  <div class="input-group">
+		  <div class="input-group-btn">
+		  <button type="button" class="btn btn-default btn-sm ms-btn-types" data-ms-url="/api/custs" title="全部" data-ms-target="custMgrTable">客户类型</button>
+		  <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="caret"></span></button>
+		  <ul class="dropdown-menu mylist-custypes" id="cust_type_onquery">
+		  </ul>
+		  </div>
+		  </div></th><th><div class="input-group input-group-sm"><input type="text" class="form-control input-group-sm" name="q" placeholder="客户名称" data-ms-target="custMgrTable" data-ms-url="/api/custs"></div></th><th>手机号码</th><th>地址</th><th>电子邮箱</th><th>日期</th></tr></thead>
 	  </table>
 	</div>
 	</div>
